@@ -28,7 +28,12 @@ class ResearchPipeline:
     def from_path(cls, path: str | Path, max_words: int = 120, overlap_words: int = 20) -> "ResearchPipeline":
         loader = DocumentLoader()
         source = Path(path)
-        records = loader.load_json(source) if source.is_file() else loader.load_directory(source)
+        if source.is_file() and source.exists():
+            records = loader.load_json(source)
+        elif source.is_dir() and source.exists():
+            records = loader.load_directory(source)
+        else:
+            records = []
         chunks = Chunker(max_words=max_words, overlap_words=overlap_words).chunk(records)
         return cls(chunks)
 

@@ -17,7 +17,7 @@ UPLOAD_PATH.mkdir(parents=True, exist_ok=True)
 ALLOWED_UPLOADS = {".json", ".md", ".txt", ".pdf"}
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024
 
-pipeline = ResearchPipeline.from_path(DATA_PATH)
+pipeline = ResearchPipeline.from_path(DATA_PATH if DATA_PATH.exists() else ROOT / "data")
 
 app = FastAPI(title="ScholarTrace", version="0.1.0")
 app.mount("/static", StaticFiles(directory=FRONTEND_PATH), name="static")

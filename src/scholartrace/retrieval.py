@@ -28,7 +28,7 @@ class HybridRetriever:
 
     def __init__(self, chunks: list[Chunk], lexical_weight: float = 0.45, bm25_weight: float = 0.35, overlap_weight: float = 0.2) -> None:
         if not chunks:
-            raise ValueError("Retriever requires at least one chunk")
+            chunks = []
         if min(lexical_weight, bm25_weight, overlap_weight) < 0 or abs(lexical_weight + bm25_weight + overlap_weight - 1) > 1e-6:
             raise ValueError("retrieval weights must be non-negative and sum to 1")
         self.chunks = chunks
@@ -74,6 +74,8 @@ class HybridRetriever:
 
     def search(self, query: str, top_k: int = 5) -> list[SearchResult]:
         if not query.strip():
+            return []
+        if not self.chunks:
             return []
         query_tokens = Counter(tokenize(query))
         if not query_tokens:
