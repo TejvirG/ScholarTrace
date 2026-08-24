@@ -3,5 +3,6 @@ __pycache__/
 .pytest_cache/
 *.py[cod]
 *.egg-info/
+data/uploads/
 .env
 .DS_Store

@@ -33,6 +33,18 @@ class DocumentLoader:
                 records.extend(self._pdf_records(path))
         return records
 
+    def load_file(self, path: str | Path) -> list[dict[str, Any]]:
+        """Load one supported file without scanning sibling files."""
+        source = Path(path)
+        suffix = source.suffix.lower()
+        if suffix == ".json":
+            return self.load_json(source)
+        if suffix in {".md", ".txt"}:
+            return [self._text_record(source)]
+        if suffix == ".pdf":
+            return self._pdf_records(source)
+        raise ValueError(f"Unsupported file type: {suffix or 'none'}")
+
     @staticmethod
     def _text_record(path: Path) -> dict[str, Any]:
         return {

@@ -22,6 +22,7 @@
       <textarea id="question" rows="3" placeholder="How should a RAG system be evaluated?">How should a RAG system be evaluated?</textarea>
       <div class="query-actions"><span>Answers are grounded in the indexed corpus.</span><button id="ask">Search evidence <b>↗</b></button></div>
     </section>
+    <section class="upload-panel"><div><p class="eyebrow">YOUR SOURCES</p><strong>Add a research document</strong><p id="upload-status">PDF, Markdown, TXT, or ScholarTrace JSON up to 10 MB.</p></div><label class="upload-button" for="document">Upload file <b>+</b></label><input id="document" type="file" accept=".pdf,.md,.txt,.json"></section>
     <section id="loading" class="loading hidden">Searching the evidence index<span>...</span></section>
     <section id="results" class="results hidden">
       <div class="answer-head"><div><p class="eyebrow">SYNTHESIS</p><h2>Grounded answer</h2></div><div id="confidence" class="confidence"></div></div>

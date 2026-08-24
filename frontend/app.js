@@ -7,6 +7,8 @@ const citations = document.querySelector('#citations');
 const confidence = document.querySelector('#confidence');
 const count = document.querySelector('#count');
 const telemetry = document.querySelector('#telemetry');
+const documentInput = document.querySelector('#document');
+const uploadStatus = document.querySelector('#upload-status');
 
 function escapeHTML(value) {
   return String(value).replace(/[&<>'"]/g, character => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[character]));
@@ -43,5 +45,22 @@ async function runQuery() {
 }
 
 ask.addEventListener('click', runQuery);
+documentInput.addEventListener('change', async () => {
+  const file = documentInput.files[0];
+  if (!file) return;
+  uploadStatus.textContent = `Indexing ${file.name}...`;
+  const form = new FormData();
+  form.append('file', file);
+  try {
+    const response = await fetch('/api/documents', {method:'POST', body:form});
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.detail || 'Upload failed');
+    uploadStatus.textContent = `${file.name} indexed: ${data.chunks_added} passage(s) added.`;
+  } catch (error) {
+    uploadStatus.textContent = error.message;
+  } finally {
+    documentInput.value = '';
+  }
+});
 question.addEventListener('keydown', event => { if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) runQuery(); });
 fetch('/api/evaluation').then(response => response.json()).then(data => { document.querySelector('#metrics').textContent = `Recall@3 ${(data.recall_at_k * 100).toFixed(0)}%`; });

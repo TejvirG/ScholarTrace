@@ -1,6 +1,7 @@
 from pathlib import Path
+from uuid import uuid4
 
-from fastapi import FastAPI
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
@@ -11,6 +12,10 @@ from .pipeline import ResearchPipeline
 ROOT = Path(__file__).resolve().parents[2]
 DATA_PATH = ROOT / "data" / "sample_corpus.json"
 FRONTEND_PATH = ROOT / "frontend"
+UPLOAD_PATH = ROOT / "data" / "uploads"
+UPLOAD_PATH.mkdir(parents=True, exist_ok=True)
+ALLOWED_UPLOADS = {".json", ".md", ".txt", ".pdf"}
+MAX_UPLOAD_BYTES = 10 * 1024 * 1024
 
 pipeline = ResearchPipeline.from_path(DATA_PATH)
 
@@ -45,7 +50,26 @@ def home():
 
 @app.get("/api/health")
 def health():
-    return {"status": "ok", "chunks": len(pipeline.chunks), "documents": len({chunk.document_id for chunk in pipeline.chunks})}
+    return {"status": "ok", "chunks": len(pipeline.chunks), "documents": len({chunk.document_id for chunk in pipeline.chunks}), "uploaded_documents": len(list(UPLOAD_PATH.iterdir()))}
+
+
+@app.post("/api/documents")
+async def upload_document(file: UploadFile = File(...)):
+    """Persist one bounded research file and add it to the active index."""
+    suffix = Path(file.filename or "").suffix.lower()
+    if suffix not in ALLOWED_UPLOADS:
+        raise HTTPException(status_code=415, detail="Supported files: .json, .md, .txt, .pdf")
+    content = await file.read(MAX_UPLOAD_BYTES + 1)
+    if len(content) > MAX_UPLOAD_BYTES:
+        raise HTTPException(status_code=413, detail="File must be 10 MB or smaller")
+    target = UPLOAD_PATH / f"{uuid4().hex}{suffix}"
+    target.write_bytes(content)
+    try:
+        added_chunks = pipeline.add_path(target)
+    except (ValueError, RuntimeError, UnicodeDecodeError) as error:
+        target.unlink(missing_ok=True)
+        raise HTTPException(status_code=400, detail=str(error)) from error
+    return {"filename": file.filename, "chunks_added": added_chunks, "total_chunks": len(pipeline.chunks)}
 
 
 @app.post("/api/query")

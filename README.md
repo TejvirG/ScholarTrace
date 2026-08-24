@@ -118,6 +118,8 @@ What are data contracts?
 
 The interface displays the grounded answer, confidence estimate, supporting passages, source metadata, retrieval count, and local retrieval latency.
 
+Use the **Upload file** control to add a PDF, Markdown file, TXT file, or ScholarTrace JSON record. Uploaded files are stored in `data/uploads/`, indexed immediately, and included in later questions. The local upload limit is 10 MB per file. On a free cloud instance, uploaded files are temporary because the service filesystem may be reset during redeploys or sleep. Use object storage or a database for permanent production data.
+
 ## API Usage
 
 Health check:
@@ -147,6 +149,12 @@ The query response includes:
 - `retrieval_count`: number of ranked passages.
 
 Each retrieved passage includes its title, section, page, source URL, combined score, TF-IDF score, overlap score, and BM25 score.
+
+Upload an individual document through the API:
+
+```powershell
+curl.exe -X POST http://127.0.0.1:8000/api/documents -F "file=@research-notes.md"
+```
 
 ## Data Ingestion
 
@@ -285,6 +293,18 @@ The project includes regression tests for:
 - API citations and telemetry.
 
 GitHub Actions runs the test suite on pushes and pull requests.
+
+## Free Deployment with Render
+
+The repository includes `render.yaml` for a free Render web service. To deploy it:
+
+1. Sign in at [render.com](https://render.com) with GitHub.
+2. Choose **New**, then **Blueprint**.
+3. Select `TejvirG/ScholarTrace`.
+4. Confirm the service from `render.yaml` and choose the free plan.
+5. Wait for the build to finish, then open the generated `.onrender.com` URL.
+
+Render uses the health check at `/api/health`. The service starts with `uvicorn` on Render's `$PORT` value. This is suitable for a public demonstration, but free instances can sleep when inactive and local uploads are not durable. Do not upload private or sensitive documents to a public demo.
 
 ## Engineering Decisions
 

@@ -38,5 +38,15 @@ class ResearchPipeline:
         answer = self.generator.answer(question, retrieved)
         return QueryExecution(answer, retrieved, round((time.perf_counter() - started) * 1000, 2))
 
+    def add_path(self, path: str | Path) -> int:
+        """Index records from a file or directory and return the new chunk count."""
+        source = Path(path)
+        loader = DocumentLoader()
+        records = loader.load_file(source) if source.is_file() else loader.load_directory(source)
+        additions = Chunker().chunk(records)
+        self.chunks.extend(additions)
+        self.retriever = HybridRetriever(self.chunks)
+        return len(additions)
+
     def evaluate(self, cases: list[EvaluationCase], k: int = 3) -> EvaluationReport:
         return EvaluationRunner(self.retriever).run(cases, k)
