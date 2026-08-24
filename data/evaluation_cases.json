@@ -1,0 +1,10 @@
+[
+  {"question": "How does retrieval augmented generation use external knowledge?", "relevant_document_ids": ["retrieval-001"]},
+  {"question": "Which metrics separate retrieval quality from answer quality?", "relevant_document_ids": ["retrieval-001"]},
+  {"question": "Why does a production ML system need observability?", "relevant_document_ids": ["systems-002"]},
+  {"question": "How do data contracts prevent upstream breakage?", "relevant_document_ids": ["systems-002"]},
+  {"question": "Why should automated evaluation include human review?", "relevant_document_ids": ["fairness-003"]},
+  {"question": "What are the limitations of automated language model metrics?", "relevant_document_ids": ["fairness-003"]},
+  {"question": "How can retrieved evidence be updated without retraining?", "relevant_document_ids": ["retrieval-001"]},
+  {"question": "What does logging make diagnosable in ML systems?", "relevant_document_ids": ["systems-002"]}
+]

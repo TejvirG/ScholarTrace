@@ -1,0 +1,21 @@
+from fastapi.testclient import TestClient
+
+from scholartrace.api import app
+
+client = TestClient(app)
+
+
+def test_health_endpoint():
+    response = client.get("/api/health")
+    assert response.status_code == 200
+    assert response.json()["chunks"] == 5
+
+
+def test_query_endpoint_exposes_citations():
+    response = client.post("/api/query", json={"question": "What is a data contract?"})
+    body = response.json()
+    assert response.status_code == 200
+    assert body["citations"]
+    assert "evidence" in body["answer"].lower() or "schema" in body["answer"].lower()
+    assert body["latency_ms"] >= 0
+    assert body["retrieval_count"] == 3

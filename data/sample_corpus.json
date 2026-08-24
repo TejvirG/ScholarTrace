@@ -1,0 +1,42 @@
+[
+  {
+    "id": "retrieval-001",
+    "title": "A Practical Guide to Retrieval-Augmented Generation",
+    "section": "Motivation",
+    "page": 1,
+    "text": "Retrieval-augmented generation combines a language model with an external document collection. Retrieval supplies evidence that can be inspected and updated without retraining the generator.",
+    "source_url": "https://example.org/rag-guide"
+  },
+  {
+    "id": "retrieval-001",
+    "title": "A Practical Guide to Retrieval-Augmented Generation",
+    "section": "Evaluation",
+    "page": 4,
+    "text": "A useful RAG evaluation separates retrieval quality from answer quality. Recall at K measures whether relevant evidence appears in the top K results, while faithfulness measures whether claims are supported by retrieved context.",
+    "source_url": "https://example.org/rag-guide"
+  },
+  {
+    "id": "systems-002",
+    "title": "Reliable Machine Learning Systems",
+    "section": "Observability",
+    "page": 7,
+    "text": "Production machine learning systems need observability for latency, errors, data drift, and model quality. Logging inputs, outputs, and component timings makes failures diagnosable.",
+    "source_url": "https://example.org/ml-systems"
+  },
+  {
+    "id": "systems-002",
+    "title": "Reliable Machine Learning Systems",
+    "section": "Data Contracts",
+    "page": 9,
+    "text": "Data contracts define the schema and quality expectations between producers and consumers. They reduce silent breakage when upstream data changes.",
+    "source_url": "https://example.org/ml-systems"
+  },
+  {
+    "id": "fairness-003",
+    "title": "Responsible Evaluation of Language Models",
+    "section": "Limitations",
+    "page": 12,
+    "text": "Automated metrics are useful signals, not complete judgments. Evaluation should include representative test cases, documented limitations, and human review for high-impact decisions.",
+    "source_url": "https://example.org/responsible-evaluation"
+  }
+]

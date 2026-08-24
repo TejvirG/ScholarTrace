@@ -1,0 +1,23 @@
+{
+  "tfidf": {
+    "cases": 50,
+    "recall_at_k": 1.0,
+    "mean_reciprocal_rank": 1.0,
+    "citation_coverage": 0.8,
+    "precision_at_k": 0.8
+  },
+  "bm25": {
+    "cases": 50,
+    "recall_at_k": 1.0,
+    "mean_reciprocal_rank": 1.0,
+    "citation_coverage": 0.333,
+    "precision_at_k": 0.333
+  },
+  "hybrid": {
+    "cases": 50,
+    "recall_at_k": 1.0,
+    "mean_reciprocal_rank": 1.0,
+    "citation_coverage": 0.8,
+    "precision_at_k": 0.8
+  }
+}

@@ -1,0 +1,80 @@
+Metadata-Version: 2.4
+Name: scholartrace
+Version: 0.1.0
+Summary: An evidence-grounded research assistant with measurable retrieval quality.
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: fastapi>=0.110
+Requires-Dist: uvicorn[standard]>=0.29
+Requires-Dist: pydantic>=2.0
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0; extra == "dev"
+Requires-Dist: httpx>=0.27; extra == "dev"
+
+# ScholarTrace
+
+ScholarTrace is an evidence-grounded research assistant built as a complete RAG system rather than a notebook demo. It ingests structured research notes, retrieves supporting passages, produces a cited answer, and measures retrieval quality.
+
+## Why this is a strong portfolio project
+
+- **Systems thinking:** ingestion, indexing, retrieval, answer composition, API, UI, and evaluation are separate modules.
+- **Reproducible:** the default pipeline is deterministic and runs locally without API keys.
+- **Research-aware:** every answer exposes source passages and a confidence score; evaluation includes Recall@K, MRR, and citation coverage.
+- **Extendable:** replace `DemoAnswerGenerator` with an LLM adapter without changing retrieval or validation contracts.
+
+## Quick start
+
+```powershell
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -e ".[dev]"
+uvicorn scholartrace.api:app --reload
+```
+
+Open `http://127.0.0.1:8000`. The API also exposes interactive docs at `/docs`.
+
+Run tests:
+
+```powershell
+pytest
+```
+
+Run the evaluation report:
+
+```powershell
+python scripts\evaluate.py
+```
+
+## Architecture
+
+```text
+Research notes -> DocumentLoader -> Chunker -> InvertedIndex
+                                             |
+Question -> HybridRetriever -> CitationValidator -> AnswerGenerator -> API/UI
+                                             |
+                                  EvaluationRunner -> metrics.json
+```
+
+The starter corpus lives in `data/sample_corpus.json`. Each record preserves a document title, section, page, and source URL. The retrieval implementation combines TF-IDF cosine similarity with token overlap and ranks both signals together.
+
+## Repository map
+
+- `src/scholartrace/ingestion.py`: validated document loading and chunking.
+- `src/scholartrace/retrieval.py`: deterministic hybrid retrieval index.
+- `src/scholartrace/generation.py`: cited local answer generation contract.
+- `src/scholartrace/evaluation.py`: benchmark cases and retrieval metrics.
+- `src/scholartrace/api.py`: FastAPI service and static frontend serving.
+- `frontend/`: intentionally small vanilla interface for quick demos.
+- `tests/`: unit and API coverage for the main behavior.
+
+## Research extensions
+
+1. Add dense embeddings and compare them with the lexical baseline.
+2. Add a cross-encoder reranker and report latency versus Recall@K.
+3. Build a human-labeled faithfulness set from 50 questions.
+4. Add answer-level claim extraction and entailment checks.
+5. Track experiments with MLflow or a lightweight JSONL run log.
+
+## Limitations
+
+The demo answer generator is extractive and intentionally avoids pretending to be a general-purpose LLM. It is a transparent baseline for measuring retrieval and citation behavior. Production use would need stronger PDF parsing, access control, prompt-injection defenses, and a reviewed model provider.

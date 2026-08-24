@@ -1,0 +1,352 @@
+[
+  {
+    "question": "What is discussed in the paper ViTacPhys: Physical Property-Aware Grasping from Human Visual-Tactile Demonstrations?",
+    "relevant_document_ids": [
+      "arxiv-2608-21355v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper Memory Augmentation Unlocks Efficient Chain-of-Thought Reasoning?",
+    "relevant_document_ids": [
+      "arxiv-2608-21265v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper EnSI-RAG: Entity-Structure-Indexed Retrieval-Augmented Generation for Long-Document Question Answering?",
+    "relevant_document_ids": [
+      "arxiv-2608-21252v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper Enhancing LLMs in Predictive Political QA with Semi-Structured Data?",
+    "relevant_document_ids": [
+      "arxiv-2608-21218v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper Specification Portability Across LLM Development Agents: Cross-Agent Compatibility in Specification-Driven Software Migration?",
+    "relevant_document_ids": [
+      "arxiv-2608-21208v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper SENTRY: Deterministic, Intelligent Risk Assessment for IT Change Management?",
+    "relevant_document_ids": [
+      "arxiv-2608-21203v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper Gluing abelian categories and stability conditions?",
+    "relevant_document_ids": [
+      "arxiv-2608-21201v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper HIERA: Workload-Aware Planning Across Implementation Spaces for GPU Kernel Optimization?",
+    "relevant_document_ids": [
+      "arxiv-2608-21157v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper Graph Engineering in the Era of LLM Agents: From Individual Intelligence to System Intelligence?",
+    "relevant_document_ids": [
+      "arxiv-2608-21156v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper When does fusing hand-crafted knowledge with learned representations pay? A cost-normalized benchmark of stacking, substitution, and interference?",
+    "relevant_document_ids": [
+      "arxiv-2608-21098v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper Trustworthy RAG: An Evaluation Agent for Detecting Misinformation and Knowledge Poisoning in Generative AI Systems?",
+    "relevant_document_ids": [
+      "arxiv-2608-21095v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper Designing a Robust LLM-Based Evaluation System for Agentic AI in Drug Discovery Through Human Alignment?",
+    "relevant_document_ids": [
+      "arxiv-2608-21057v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper PhysCaP: Grounding Code-as-Policy Agent with Physics-Informed Exploration?",
+    "relevant_document_ids": [
+      "arxiv-2608-21031v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper Target-Aware Calibration Data Selection for Preserving Uncertainty in Quantized Language Models?",
+    "relevant_document_ids": [
+      "arxiv-2608-21019v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper SuppreSensing: Expert-Guided Feature Recalibration and Discrepancy Augmentation for Multimodal Object Detection?",
+    "relevant_document_ids": [
+      "arxiv-2608-20944v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper OccluRank: Controllable Occlusion-Aware Layout-to-Image Generation by Adding Just an Ordinal Rank?",
+    "relevant_document_ids": [
+      "arxiv-2608-20932v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper UpgradeBench: A Decision-Centric Benchmark for Upgrading Fine-Tuned LLM Specialists?",
+    "relevant_document_ids": [
+      "arxiv-2608-20918v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper Explainable Deepfake Detection with Feature-robust Augmentation and Evidence-grounded Explanation Optimization?",
+    "relevant_document_ids": [
+      "arxiv-2608-20913v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper Identify, Locate, Link: End-to-End Key-Value Extraction from Document Images?",
+    "relevant_document_ids": [
+      "arxiv-2608-20868v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper RAG Deserves an Index: Why Ingest-Time Compilation Beats Query-Time Interpretation?",
+    "relevant_document_ids": [
+      "arxiv-2608-20845v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper Vis-Poison: Poisoning Visual Knowledge in Multimodal Retrieval-Augmented Generation?",
+    "relevant_document_ids": [
+      "arxiv-2608-20756v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper Heterogeneous Effects of Continuous Treatments via Conditional Modified Treatment Policies?",
+    "relevant_document_ids": [
+      "arxiv-2608-20744v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper Bridging Language and Spherical Space: Object-Centric Control for Text-to-Panorama Generation?",
+    "relevant_document_ids": [
+      "arxiv-2608-20691v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper Temporal Validity on Real Software Histories: Eliminating Stale-Fact Errors in Code-Assistant Memory over GitHub Fixes?",
+    "relevant_document_ids": [
+      "arxiv-2608-20685v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper Auditable by Construction: An Ontology-Driven Framework for Trustworthy LLM Analytics in Enterprise Finance?",
+    "relevant_document_ids": [
+      "arxiv-2608-20661v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper When Failures Propagate: Causal Failure Attribution in Agentic Retrieval-Augmented Generation?",
+    "relevant_document_ids": [
+      "arxiv-2608-20627v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper Portability of Fortran's 'do concurrent' on GPUs II?",
+    "relevant_document_ids": [
+      "arxiv-2608-20586v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper The Parafree Conjecture for associative algebras?",
+    "relevant_document_ids": [
+      "arxiv-2608-20570v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper $N$-Koszul algebras of finite global dimension for $N\\geq 3$?",
+    "relevant_document_ids": [
+      "arxiv-2608-20567v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper Learning Prostate Anatomy at Test Time for Cancer Detection in Micro-Ultrasound?",
+    "relevant_document_ids": [
+      "arxiv-2608-20557v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper An integrated diffusion-weighted imaging processing and interpretation platform for MR-guided radiotherapy?",
+    "relevant_document_ids": [
+      "arxiv-2608-20519v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper Learning-Based Measurement-Robust Control Barrier Functions for Obstacle Avoidance under State Estimation Error?",
+    "relevant_document_ids": [
+      "arxiv-2608-20467v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper An Agentic Approach for Active Data Collection, Travel Behavior Modeling, and Weather-Sensitive Demand Prediction?",
+    "relevant_document_ids": [
+      "arxiv-2608-20320v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper Pandora's AI Model Routing Box: Efficient Allocation with Costly Value Estimation?",
+    "relevant_document_ids": [
+      "arxiv-2608-20316v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper QED radiative effects in semi-inclusive deep-inelastic scattering: traditional and factorized approaches?",
+    "relevant_document_ids": [
+      "arxiv-2608-20294v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper Transfer Learning in Nonparametric Regression with Deep ReLU Networks?",
+    "relevant_document_ids": [
+      "arxiv-2608-20255v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper What Makes a Good Fiqh Retriever? Answer Retrieval for Arabic Islamic Jurisprudence?",
+    "relevant_document_ids": [
+      "arxiv-2608-20246v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper Extraction of DVCS amplitudes off the nucleon?",
+    "relevant_document_ids": [
+      "arxiv-2608-20244v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper When Text and Numbers Disagree: Evidence Arbitration in Large Language Models?",
+    "relevant_document_ids": [
+      "arxiv-2608-20116v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper TrustRAG: Blockchain-Enhanced RAG via Committee-Based Credibility Scoring?",
+    "relevant_document_ids": [
+      "arxiv-2608-20097v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper Dynamical one-from-many quantum metrology: Sum rule and matrix-free precision bound?",
+    "relevant_document_ids": [
+      "arxiv-2608-19988v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper PVRA: A Pointwise Key-point Voting Framework for Robotic Assembly?",
+    "relevant_document_ids": [
+      "arxiv-2608-19968v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper DIFFCZSL: Compositional Zero-Shot Learning Regularized by Diffusion Representations?",
+    "relevant_document_ids": [
+      "arxiv-2608-19871v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper A Fixed-Penalty Linearized Augmented Lagrangian Method with Classical Multiplier Updates?",
+    "relevant_document_ids": [
+      "arxiv-2608-19847v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper Simulation-to-Real First-Break Segmentation for Efficient Inversion in Musculoskeletal Ultrasound Tomography?",
+    "relevant_document_ids": [
+      "arxiv-2608-19828v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper Gallileo-4D: Frozen Backbone Ensemble for Dynamic 4D Reconstruction?",
+    "relevant_document_ids": [
+      "arxiv-2608-19743v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper Tropical and Stringy Integrals for In-In Correlators?",
+    "relevant_document_ids": [
+      "arxiv-2608-19720v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper RIPE++: Reinforced Keypoint Learning from Positive Pairs Only?",
+    "relevant_document_ids": [
+      "arxiv-2608-19693v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper SAGE-XGBoost: Spatially Augmented Graph Embeddings--Machine Learning Framework for Natural Hazards Susceptibility Mapping under Data Scarcity?",
+    "relevant_document_ids": [
+      "arxiv-2608-19672v1"
+    ],
+    "label_source": "silver-title-match"
+  },
+  {
+    "question": "What is discussed in the paper Training-Free LLM-Based Recommendation with Post-LLM Item Refinement Using Collaborative Signals?",
+    "relevant_document_ids": [
+      "arxiv-2608-19665v1"
+    ],
+    "label_source": "silver-title-match"
+  }
+]
