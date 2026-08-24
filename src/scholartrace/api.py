@@ -25,7 +25,9 @@ def _resolve_project_root() -> Path:
 
 
 ROOT = _resolve_project_root()
-DATA_PATH = ROOT / "data" / "sample_corpus.json"
+ARXIV_PATH = ROOT / "data" / "arxiv_corpus.json"
+SAMPLE_PATH = ROOT / "data" / "sample_corpus.json"
+DATA_PATH = ARXIV_PATH if ARXIV_PATH.exists() else SAMPLE_PATH
 FRONTEND_PATH = ROOT / "frontend"
 UPLOAD_PATH = ROOT / "data" / "uploads"
 UPLOAD_PATH.mkdir(parents=True, exist_ok=True)

@@ -20,15 +20,18 @@ def test_project_root_resolves_from_installed_package_layout(monkeypatch, tmp_pa
 def test_health_endpoint():
     response = client.get("/api/health")
     assert response.status_code == 200
-    assert response.json()["chunks"] == 5
+    payload = response.json()
+    assert payload["chunks"] > 0
+    assert payload["documents"] > 0
 
 
 def test_query_endpoint_exposes_citations():
-    response = client.post("/api/query", json={"question": "What is a data contract?"})
+    response = client.post("/api/query", json={"question": "What is retrieval augmented generation?", "top_k": 3})
     body = response.json()
     assert response.status_code == 200
     assert body["citations"]
-    assert "evidence" in body["answer"].lower() or "schema" in body["answer"].lower()
+    answer = body["answer"].lower()
+    assert "retrieval" in answer and "generation" in answer
     assert body["latency_ms"] >= 0
     assert body["retrieval_count"] == 3
 
