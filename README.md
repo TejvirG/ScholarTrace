@@ -4,7 +4,7 @@
 
 ScholarTrace is a complete Retrieval-Augmented Generation project built to show how an AI system works beyond a single notebook or model call. It accepts research documents, turns them into searchable passages, ranks evidence for a question, produces an answer with citations, and reports how well the retrieval system performed.
 
-The project is designed for clarity and reproducibility. The default answer generator is deterministic and runs locally without an API key. This makes it possible to inspect the retrieval pipeline, reproduce the experiments, and understand system failures before adding a hosted language model.
+The project is designed for clarity and reproducibility. The default answer generator is deterministic and runs locally without an API key. In normal use, the application loads the real arXiv research corpus; the tiny sample corpus is not the default runtime dataset and is kept only as a lightweight fallback for smoke tests. This makes it possible to inspect the retrieval pipeline, reproduce the experiments, and understand system failures before adding a hosted language model.
 
 ## Why This Project Matters
 
@@ -182,10 +182,18 @@ For PDFs, the loader creates one source record per page so citations retain page
 
 ## Reproducible Experiments
 
-The repository includes a 50-paper arXiv abstract snapshot in `data/arxiv_corpus.json`. Recreate the snapshot and its silver-label cases with:
+The repository includes a default arXiv abstract corpus in `data/arxiv_corpus.json` when you generate or fetch one locally. The app prefers this corpus automatically and does not rely on the tiny sample corpus in normal use. For a much larger research corpus, generate a larger snapshot with:
 
 ```powershell
-python scripts\collect_arxiv.py --limit 50
+python scripts\collect_arxiv.py --limit 1000
+python scripts\build_arxiv_cases.py
+python scripts\run_experiments.py
+```
+
+For a smaller local smoke test, you may still generate the sample corpus manually, but it is not the default application dataset.
+
+```powershell
+python scripts\collect_arxiv.py --limit 1000
 python scripts\build_arxiv_cases.py
 python scripts\run_experiments.py
 ```
@@ -233,6 +241,16 @@ The checked-in arXiv experiment currently reports:
 | Hybrid | 1.000 | 1.000 | 0.800 | 0.800 |
 
 These results are useful as a baseline, but they should not be overstated. The arXiv cases are generated from paper titles and therefore are silver labels. Perfect recall on this task does not mean the system solves general academic question answering.
+
+## Dataset Strategy
+
+ScholarTrace intentionally supports multiple corpus levels:
+
+- `data/arxiv_corpus.json`: the real-world abstract corpus collected from arXiv and used by default in normal application mode.
+- `data/sample_corpus.json`: lightweight demo data retained only for smoke tests or local debugging.
+- `data/uploads/`: user-uploaded research documents that are indexed at runtime.
+
+The web app and evaluation scripts prefer the real arXiv corpus, and the sample corpus is no longer the default runtime source. This keeps the project aligned with real research use while still allowing lightweight local verification.
 
 ## Repository Structure
 
