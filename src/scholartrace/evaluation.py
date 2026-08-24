@@ -47,10 +47,11 @@ class EvaluationRunner:
 
 
 def starter_cases() -> list[EvaluationCase]:
+    """Evaluation cases using real arXiv document IDs from the corpus."""
     return [
-        EvaluationCase("How does retrieval help language models?", {"retrieval-001"}),
-        EvaluationCase("What metrics separate retrieval and answer quality?", {"retrieval-001"}),
-        EvaluationCase("Why do machine learning systems need observability?", {"systems-002"}),
-        EvaluationCase("What are data contracts?", {"systems-002"}),
-        EvaluationCase("Why is human review needed for automated metrics?", {"fairness-003"}),
+        EvaluationCase("What are the benefits of retrieval-augmented generation?", {"arxiv-2608-21252v1"}),
+        EvaluationCase("How can RAG improve language model trustworthiness?", {"arxiv-2608-21095v1"}),
+        EvaluationCase("What role does memory play in reasoning systems?", {"arxiv-2608-21265v1"}),
+        EvaluationCase("How should we evaluate LLM-based systems?", {"arxiv-2608-21057v1"}),
+        EvaluationCase("What are challenges in agent-based systems?", {"arxiv-2608-21156v1"}),
     ]
