@@ -27,28 +27,35 @@ class HybridRetriever:
     """Small, explainable TF-IDF plus token-overlap retrieval baseline."""
 
     def __init__(self, chunks: list[Chunk], lexical_weight: float = 0.45, bm25_weight: float = 0.35, overlap_weight: float = 0.2) -> None:
-        if not chunks:
-            chunks = []
         if min(lexical_weight, bm25_weight, overlap_weight) < 0 or abs(lexical_weight + bm25_weight + overlap_weight - 1) > 1e-6:
             raise ValueError("retrieval weights must be non-negative and sum to 1")
         self.chunks = chunks
         self.lexical_weight = lexical_weight
         self.bm25_weight = bm25_weight
         self.overlap_weight = overlap_weight
-        self._tokens = [Counter(tokenize(f"{chunk.title} {chunk.section} {chunk.text}")) for chunk in chunks]
-        self._average_length = sum(sum(tokens.values()) for tokens in self._tokens) / len(chunks)
-        document_frequency = Counter()
-        for tokens in self._tokens:
-            document_frequency.update(tokens.keys())
-        self._idf = {
-            term: math.log((1 + len(chunks)) / (1 + frequency)) + 1
-            for term, frequency in document_frequency.items()
-        }
-        self._vectors = [self._vector(tokens) for tokens in self._tokens]
-        self._norms = [self._norm(vector) for vector in self._vectors]
+        if not chunks:
+            self._tokens = []
+            self._average_length = 0
+            self._idf = {}
+            self._vectors = []
+            self._norms = []
+        else:
+            self._tokens = [Counter(tokenize(f"{chunk.title} {chunk.section} {chunk.text}")) for chunk in chunks]
+            self._average_length = sum(sum(tokens.values()) for tokens in self._tokens) / len(chunks)
+            document_frequency = Counter()
+            for tokens in self._tokens:
+                document_frequency.update(tokens.keys())
+            self._idf = {
+                term: math.log((1 + len(chunks)) / (1 + frequency)) + 1
+                for term, frequency in document_frequency.items()
+            }
+            self._vectors = [self._vector(tokens) for tokens in self._tokens]
+            self._norms = [self._norm(vector) for vector in self._vectors]
 
     def _bm25(self, query_terms: set[str], index: int) -> float:
         """Score term saturation and document rarity using Okapi BM25."""
+        if not self._average_length:
+            return 0.0
         k1, b = 1.5, 0.75
         length = sum(self._tokens[index].values()) or 1
         score = 0.0
