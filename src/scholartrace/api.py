@@ -9,7 +9,22 @@ from pydantic import BaseModel, Field
 from .evaluation import starter_cases
 from .pipeline import ResearchPipeline
 
-ROOT = Path(__file__).resolve().parents[2]
+
+def _resolve_project_root() -> Path:
+    current = Path.cwd().resolve()
+    module_file = Path(__file__).resolve()
+    candidates = [current, *current.parents, module_file.parent, *module_file.parents]
+    seen = set()
+    for candidate in candidates:
+        if candidate in seen:
+            continue
+        seen.add(candidate)
+        if (candidate / "frontend").exists() and (candidate / "src" / "scholartrace").exists():
+            return candidate
+    return current
+
+
+ROOT = _resolve_project_root()
 DATA_PATH = ROOT / "data" / "sample_corpus.json"
 FRONTEND_PATH = ROOT / "frontend"
 UPLOAD_PATH = ROOT / "data" / "uploads"
@@ -20,7 +35,8 @@ MAX_UPLOAD_BYTES = 10 * 1024 * 1024
 pipeline = ResearchPipeline.from_path(DATA_PATH if DATA_PATH.exists() else ROOT / "data")
 
 app = FastAPI(title="ScholarTrace", version="0.1.0")
-app.mount("/static", StaticFiles(directory=FRONTEND_PATH), name="static")
+if FRONTEND_PATH.exists():
+    app.mount("/static", StaticFiles(directory=FRONTEND_PATH), name="static")
 
 
 class QueryRequest(BaseModel):
@@ -45,7 +61,10 @@ def serialize_result(result):
 
 @app.get("/", include_in_schema=False)
 def home():
-    return FileResponse(FRONTEND_PATH / "index.html")
+    index_path = FRONTEND_PATH / "index.html"
+    if index_path.exists():
+        return FileResponse(index_path)
+    return {"status": "ok", "message": "API is running; no frontend bundle was found in this environment."}
 
 
 @app.get("/api/health")

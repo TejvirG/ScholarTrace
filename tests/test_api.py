@@ -1,8 +1,20 @@
+from pathlib import Path
+
 from fastapi.testclient import TestClient
 
-from scholartrace.api import app
+import scholartrace.api as api
 
-client = TestClient(app)
+client = TestClient(api.app)
+
+
+def test_project_root_resolves_from_installed_package_layout(monkeypatch, tmp_path):
+    root = tmp_path / "project"
+    (root / "frontend").mkdir(parents=True)
+    (root / "src" / "scholartrace").mkdir(parents=True)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(api, "__file__", str(root / "site-packages" / "scholartrace" / "api.py"))
+
+    assert api._resolve_project_root() == root
 
 
 def test_health_endpoint():
