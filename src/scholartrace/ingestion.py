@@ -54,6 +54,7 @@ class DocumentLoader:
             "page": 1,
             "text": path.read_text(encoding="utf-8"),
             "source_url": f"file://{path.resolve()}",
+            "source_pdf": None,
         }
 
     @staticmethod
@@ -71,6 +72,7 @@ class DocumentLoader:
             "page": page_number,
             "text": page.extract_text() or "",
             "source_url": source_url,
+            "source_pdf": str(path.resolve()),
         } for page_number, page in enumerate(PdfReader(str(path)).pages, start=1)]
 
 
@@ -100,5 +102,9 @@ class Chunker:
                     page=int(record["page"]),
                     text=text,
                     source_url=str(record["source_url"]),
+                    authors=list(record.get("authors", [])) or None,
+                    year=int(record["year"]) if record.get("year") else None,
+                    doi=str(record["doi"]) if record.get("doi") else None,
+                    source_pdf=str(record["source_pdf"]) if record.get("source_pdf") else None,
                 ))
         return chunks

@@ -10,20 +10,16 @@
   <main class="shell">
     <header class="topbar">
       <div class="brand"><span class="mark">ST</span><span>ScholarTrace</span></div>
-      <div class="header-right">
-        <span class="status"><i></i> Local evidence index</span>
-        <span class="research-badge">Research corpus active</span>
-      </div>
     </header>
     <section class="intro">
-      <p class="eyebrow">RESEARCH WORKBENCH / 01</p>
+      <p class="eyebrow">RESEARCH WORKBENCH</p>
       <h1>Ask the literature.<br><em>See the evidence.</em></h1>
       <p class="lede">A transparent retrieval-augmented assistant for answers you can actually inspect.</p>
     </section>
     <section class="query-panel">
       <label for="question">Research question</label>
-      <textarea id="question" rows="3" placeholder="How should a RAG system be evaluated?">How should a RAG system be evaluated?</textarea>
-      <div class="query-actions"><span>Answers are grounded in the indexed corpus.</span><button id="ask">Search evidence <b>↗</b></button></div>
+      <textarea id="question" rows="3" placeholder="Type a question"></textarea>
+      <div class="query-actions"><span>Searches use the active uploaded file when present.</span><button id="ask">Search evidence <b>↗</b></button></div>
     </section>
     <section class="upload-panel"><div><p class="eyebrow">YOUR SOURCES</p><strong>Add a research document</strong><p id="upload-status">PDF, Markdown, TXT, or ScholarTrace JSON up to 10 MB.</p></div><label class="upload-button" for="document">Upload file <b>+</b></label><input id="document" type="file" accept=".pdf,.md,.txt,.json"></section>
     <section id="loading" class="loading hidden">Searching the evidence index<span>...</span></section>
@@ -31,7 +27,7 @@
       <div class="answer-head"><div><p class="eyebrow">SYNTHESIS</p><h2>Grounded answer</h2></div><div id="confidence" class="confidence"></div></div>
       <p id="answer" class="answer"></p>
       <div id="telemetry" class="telemetry"></div>
-      <div class="evidence-head"><h3>Supporting passages</h3><span id="count"></span></div>
+      <div id="count" class="count-inline"></div>
       <div id="citations" class="citation-list"></div>
     </section>
     <footer><span>ScholarTrace v0.1</span><span>Retrieval metrics <strong id="metrics">loading</strong></span></footer>

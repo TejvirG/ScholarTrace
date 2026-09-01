@@ -6,8 +6,12 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from .evaluation import starter_cases
+from .evaluation import load_cases, starter_cases
 from .pipeline import ResearchPipeline
+from .retrieval import HybridRetriever
+
+LAST_UPLOADED_TEXT = ""
+LAST_UPLOADED_CHUNK_IDS: list[str] = []
 
 
 def _resolve_project_root() -> Path:
@@ -26,8 +30,8 @@ def _resolve_project_root() -> Path:
 
 ROOT = _resolve_project_root()
 ARXIV_PATH = ROOT / "data" / "arxiv_corpus.json"
-SAMPLE_PATH = ROOT / "data" / "sample_corpus.json"
-DATA_PATH = ARXIV_PATH if ARXIV_PATH.exists() else SAMPLE_PATH
+# The app uses the real research corpus by default. The demo/sample corpus is excluded from runtime.
+DATA_PATH = ARXIV_PATH if ARXIV_PATH.exists() else ROOT / "data"
 FRONTEND_PATH = ROOT / "frontend"
 UPLOAD_PATH = ROOT / "data" / "uploads"
 UPLOAD_PATH.mkdir(parents=True, exist_ok=True)
@@ -35,6 +39,7 @@ ALLOWED_UPLOADS = {".json", ".md", ".txt", ".pdf"}
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024
 
 pipeline = ResearchPipeline.from_path(DATA_PATH if DATA_PATH.exists() else ROOT / "data")
+EVALUATION_PATH = ROOT / "data" / "arxiv_evaluation_cases.json"
 
 app = FastAPI(title="ScholarTrace", version="0.1.0")
 if FRONTEND_PATH.exists():
@@ -42,8 +47,8 @@ if FRONTEND_PATH.exists():
 
 
 class QueryRequest(BaseModel):
-    question: str = Field(min_length=3, max_length=500)
-    top_k: int = Field(default=3, ge=1, le=10)
+    question: str = Field(default="", max_length=500)
+    top_k: int = Field(default=4, ge=1, le=10)
 
 
 def serialize_result(result):
@@ -54,6 +59,10 @@ def serialize_result(result):
         "page": result.chunk.page,
         "text": result.chunk.text,
         "source_url": result.chunk.source_url,
+        "authors": result.chunk.authors,
+        "year": result.chunk.year,
+        "doi": result.chunk.doi,
+        "source_pdf": result.chunk.source_pdf,
         "score": round(result.score, 3),
         "lexical_score": round(result.lexical_score, 3),
         "overlap_score": round(result.overlap_score, 3),
@@ -71,12 +80,23 @@ def home():
 
 @app.get("/api/health")
 def health():
-    return {"status": "ok", "chunks": len(pipeline.chunks), "documents": len({chunk.document_id for chunk in pipeline.chunks}), "uploaded_documents": len(list(UPLOAD_PATH.iterdir()))}
+    summary = pipeline.index_summary()
+    return {
+        "status": "ok",
+        "index_ready": bool(pipeline.chunks),
+        "retriever_type": type(pipeline.retriever).__name__,
+        "data_source": summary["data_source"],
+        "chunks": summary["chunks"],
+        "documents": summary["documents"],
+        "uploaded_documents": len(list(UPLOAD_PATH.iterdir())),
+        "chunking_config": summary["chunking_config"],
+    }
 
 
 @app.post("/api/documents")
 async def upload_document(file: UploadFile = File(...)):
     """Persist one bounded research file and add it to the active index."""
+    global LAST_UPLOADED_TEXT, LAST_UPLOADED_CHUNK_IDS
     suffix = Path(file.filename or "").suffix.lower()
     if suffix not in ALLOWED_UPLOADS:
         raise HTTPException(status_code=415, detail="Supported files: .json, .md, .txt, .pdf")
@@ -90,12 +110,48 @@ async def upload_document(file: UploadFile = File(...)):
     except (ValueError, RuntimeError, UnicodeDecodeError) as error:
         target.unlink(missing_ok=True)
         raise HTTPException(status_code=400, detail=str(error)) from error
-    return {"filename": file.filename, "chunks_added": added_chunks, "total_chunks": len(pipeline.chunks)}
+
+    LAST_UPLOADED_CHUNK_IDS = [chunk.id for chunk in pipeline.chunks[-added_chunks:]]
+    if suffix in {".md", ".txt", ".json"}:
+        try:
+            LAST_UPLOADED_TEXT = content.decode("utf-8", errors="ignore")
+        except Exception:
+            LAST_UPLOADED_TEXT = ""
+    else:
+        LAST_UPLOADED_TEXT = ""
+
+    return {"filename": file.filename, "chunks_added": added_chunks, "total_chunks": len(pipeline.chunks), "uploaded_text_length": len(LAST_UPLOADED_TEXT)}
 
 
 @app.post("/api/query")
 def query(request: QueryRequest):
-    execution = pipeline.query(request.question, request.top_k)
+    global LAST_UPLOADED_TEXT, LAST_UPLOADED_CHUNK_IDS
+    question = request.question.strip()
+    if not question:
+        question = LAST_UPLOADED_TEXT.strip()
+    if not question:
+        raise HTTPException(status_code=400, detail="Provide a question or upload a file to search from.")
+
+    if LAST_UPLOADED_CHUNK_IDS:
+        scoped_chunks = [chunk for chunk in pipeline.chunks if chunk.id in LAST_UPLOADED_CHUNK_IDS]
+        retriever = HybridRetriever(scoped_chunks)
+        results = retriever.search(question, request.top_k)
+        answer = pipeline.generator.answer(question, results, allow_fallback=True)
+        execution = type("QueryExecution", (), {"answer": answer, "retrieved": results, "latency_ms": 0})()
+        answer_payload = execution.answer
+        results_payload = execution.retrieved
+        return {
+            "question": answer_payload.question,
+            "answer": answer_payload.text,
+            "confidence": answer_payload.confidence,
+            "abstained": answer_payload.abstained,
+            "citations": [serialize_result(result) for result in answer_payload.citations],
+            "retrieval": [serialize_result(result) for result in results_payload],
+            "latency_ms": execution.latency_ms,
+            "retrieval_count": len(results_payload),
+        }
+
+    execution = pipeline.query(question, request.top_k)
     answer = execution.answer
     results = execution.retrieved
     return {
@@ -112,5 +168,6 @@ def query(request: QueryRequest):
 
 @app.get("/api/evaluation")
 def evaluation():
-    report = pipeline.evaluate(starter_cases())
-    return report.__dict__
+    cases = load_cases(EVALUATION_PATH, limit=50) if EVALUATION_PATH.exists() else starter_cases()
+    report = pipeline.evaluate(cases, k=5)
+    return {**report.__dict__, "recall_at_k": report.recall_at_5}

@@ -48,3 +48,11 @@ def test_directory_loader_supports_markdown_and_configurable_chunks(tmp_path):
 def test_precision_uses_actual_returned_results():
     report = EvaluationRunner(build_retriever()).run(starter_cases(), k=20)
     assert report.precision_at_k <= 1
+
+
+def test_hybrid_retriever_exposes_semantic_and_lexical_scores():
+    retriever = HybridRetriever(build_retriever().chunks, semantic_weight=0.3, lexical_weight=0.4, bm25_weight=0.2, overlap_weight=0.1)
+    results = retriever.search("How should RAG retrieval be evaluated?", top_k=2)
+    assert results
+    assert hasattr(results[0], "semantic_score")
+    assert results[0].semantic_score >= 0.0

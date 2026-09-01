@@ -5,19 +5,22 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "scholartrace"
 version = "0.1.0"
-description = "An evidence-grounded research assistant with measurable retrieval quality."
+description = "Transparent evidence-guided academic retrieval and citation-grounded QA for research workflows."
 readme = "README.md"
 requires-python = ">=3.10"
+keywords = ["retrieval-augmented-generation", "rag", "academic-search", "research-assistant", "evaluation"]
 dependencies = [
   "fastapi>=0.110",
   "uvicorn[standard]>=0.29",
   "pydantic>=2.0",
   "python-multipart>=0.0.9",
+  "scikit-learn>=1.5",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0", "httpx>=0.27"]
+dev = ["pytest>=8.0", "httpx>=0.27", "ruff>=0.5"]
 pdf = ["pypdf>=4.0"]
+dense = ["sentence-transformers>=3.0"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

@@ -23,6 +23,9 @@ def test_health_endpoint():
     payload = response.json()
     assert payload["chunks"] > 0
     assert payload["documents"] > 0
+    assert payload["index_ready"] is True
+    assert payload["retriever_type"] == "HybridRetriever"
+    assert "data_source" in payload
 
 
 def test_query_endpoint_exposes_citations():
@@ -34,6 +37,28 @@ def test_query_endpoint_exposes_citations():
     assert "retrieval" in answer and "generation" in answer
     assert body["latency_ms"] >= 0
     assert body["retrieval_count"] == 3
+
+
+def test_query_supports_uploaded_file_without_manual_prompt():
+    upload = client.post("/api/documents", files={"file": ("research-notes.md", b"A unique field note about reproducible deployment.", "text/markdown")})
+    assert upload.status_code == 200
+
+    response = client.post("/api/query", json={"top_k": 4})
+    body = response.json()
+    assert response.status_code == 200
+    assert 1 <= body["retrieval_count"] <= 4
+    assert body["answer"]
+
+
+def test_uploaded_file_becomes_active_evidence_source_for_queries():
+    upload = client.post("/api/documents", files={"file": ("deployment-notes.md", b"This document describes reproducible deployment and release evidence for a service. It includes rollback checks and monitoring signals.", "text/markdown")})
+    assert upload.status_code == 200
+
+    response = client.post("/api/query", json={"question": "What is the capital of France?", "top_k": 4})
+    body = response.json()
+    assert response.status_code == 200
+    answer = body["answer"].lower()
+    assert "deployment" in answer or "reproducible" in answer or "rollback" in answer or "monitoring" in answer
 
 
 def test_document_upload_indexes_text_file():

@@ -2,6 +2,9 @@ import math
 import re
 from collections import Counter
 
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
 from .models import Chunk, SearchResult
 
 _TOKEN_RE = re.compile(r"[a-zA-Z0-9]{2,}")
@@ -24,15 +27,27 @@ def tokenize(text: str) -> list[str]:
 
 
 class HybridRetriever:
-    """Small, explainable TF-IDF plus token-overlap retrieval baseline."""
+    """Explainable lexical retrieval with optional semantic dense similarity."""
 
-    def __init__(self, chunks: list[Chunk], lexical_weight: float = 0.45, bm25_weight: float = 0.35, overlap_weight: float = 0.2) -> None:
-        if min(lexical_weight, bm25_weight, overlap_weight) < 0 or abs(lexical_weight + bm25_weight + overlap_weight - 1) > 1e-6:
+    def __init__(
+        self,
+        chunks: list[Chunk],
+        lexical_weight: float = 0.45,
+        bm25_weight: float = 0.35,
+        overlap_weight: float = 0.2,
+        semantic_weight: float = 0.0,
+    ) -> None:
+        weights = [lexical_weight, bm25_weight, overlap_weight, semantic_weight]
+        if min(weights) < 0 or abs(sum(weights) - 1) > 1e-6:
             raise ValueError("retrieval weights must be non-negative and sum to 1")
         self.chunks = chunks
         self.lexical_weight = lexical_weight
         self.bm25_weight = bm25_weight
         self.overlap_weight = overlap_weight
+        self.semantic_weight = semantic_weight
+        self._semantic_vectorizer = None
+        self._semantic_matrix = None
+        self._semantic_model = None
         if not chunks:
             self._tokens = []
             self._average_length = 0
@@ -51,6 +66,25 @@ class HybridRetriever:
             }
             self._vectors = [self._vector(tokens) for tokens in self._tokens]
             self._norms = [self._norm(vector) for vector in self._vectors]
+            self._init_semantic_index()
+
+    def _init_semantic_index(self) -> None:
+        if not self.chunks or self.semantic_weight == 0:
+            return
+        texts = [f"{chunk.title} {chunk.section} {chunk.text}" for chunk in self.chunks]
+        try:
+            from sentence_transformers import SentenceTransformer
+        except ImportError:
+            self._semantic_vectorizer = TfidfVectorizer(ngram_range=(1, 2), stop_words="english", min_df=1)
+            self._semantic_matrix = self._semantic_vectorizer.fit_transform(texts)
+            return
+        try:
+            self._semantic_model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+            self._semantic_matrix = self._semantic_model.encode(texts, convert_to_numpy=True, normalize_embeddings=True)
+        except Exception:
+            self._semantic_model = None
+            self._semantic_vectorizer = TfidfVectorizer(ngram_range=(1, 2), stop_words="english", min_df=1)
+            self._semantic_matrix = self._semantic_vectorizer.fit_transform(texts)
 
     def _bm25(self, query_terms: set[str], index: int) -> float:
         """Score term saturation and document rarity using Okapi BM25."""
@@ -79,7 +113,23 @@ class HybridRetriever:
         product = sum(value * self._vectors[index].get(term, 0.0) for term, value in query.items())
         return product / (query_norm * self._norms[index])
 
-    def search(self, query: str, top_k: int = 5) -> list[SearchResult]:
+    def _semantic_score(self, query: str, index: int) -> float:
+        if self.semantic_weight == 0 or self._semantic_matrix is None:
+            return 0.0
+        if self._semantic_model is not None:
+            encoded = self._semantic_model.encode([query], convert_to_numpy=True, normalize_embeddings=True)
+            sims = cosine_similarity(encoded, self._semantic_matrix).ravel()
+            return float(sims[index]) if 0 <= index < len(sims) else 0.0
+        if self._semantic_vectorizer is not None:
+            query_vector = self._semantic_vectorizer.transform([query])
+            sims = cosine_similarity(query_vector, self._semantic_matrix).ravel()
+            return float(sims[index]) if 0 <= index < len(sims) else 0.0
+        return 0.0
+
+    def search(self, query: str, top_k: int = 5, candidate_pool: int = 50) -> list[SearchResult]:
+        """Retrieve final results from a wider hybrid candidate pool."""
+        if top_k <= 0 or candidate_pool <= 0:
+            raise ValueError("top_k and candidate_pool must be positive")
         if not query.strip():
             return []
         if not self.chunks:
@@ -96,11 +146,19 @@ class HybridRetriever:
             overlap = len(query_terms & chunk_terms) / max(len(query_terms), 1)
             lexical = self._cosine(query_vector, query_norm, index)
             bm25 = self._bm25(query_terms, index)
+            semantic = self._semantic_score(query, index)
             normalized_bm25 = bm25 / (bm25 + 1) if bm25 else 0.0
-            score = (self.lexical_weight * lexical) + (self.bm25_weight * normalized_bm25) + (self.overlap_weight * overlap)
-            scored.append(SearchResult(chunk, score, lexical, overlap, bm25))
+            score = (self.lexical_weight * lexical) + (self.bm25_weight * normalized_bm25) + (self.overlap_weight * overlap) + (self.semantic_weight * semantic)
+            scored.append(SearchResult(chunk, score, lexical, overlap, bm25, semantic))
         scored.sort(key=lambda result: (-result.score, result.chunk.id))
-        return self._diverse_rerank(scored, max(1, top_k))
+        vector_ranked = sorted(scored, key=lambda result: (-result.lexical_score, result.chunk.id))
+        bm25_ranked = sorted(scored, key=lambda result: (-result.bm25_score, result.chunk.id))
+        semantic_ranked = sorted(scored, key=lambda result: (-result.semantic_score, result.chunk.id))
+        pool = {result.chunk.id: result for result in vector_ranked[:candidate_pool]}
+        pool.update({result.chunk.id: result for result in bm25_ranked[:candidate_pool]})
+        pool.update({result.chunk.id: result for result in semantic_ranked[:candidate_pool]})
+        candidates = sorted(pool.values(), key=lambda result: (-result.score, result.chunk.id))
+        return self._diverse_rerank(candidates, min(top_k, len(candidates)))
 
     @staticmethod
     def _diverse_rerank(results: list[SearchResult], top_k: int) -> list[SearchResult]:

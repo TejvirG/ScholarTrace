@@ -44,7 +44,7 @@ def collect(query: str, limit: int) -> list[dict[str, object]]:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--query", default="all:%22retrieval augmented generation%22")
-    parser.add_argument("--limit", type=int, default=50)
+    parser.add_argument("--limit", type=int, default=1000)
     parser.add_argument("--output", type=Path, default=Path("data/arxiv_corpus.json"))
     args = parser.parse_args()
     records = collect(args.query, args.limit)

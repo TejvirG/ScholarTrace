@@ -1,244 +1,197 @@
 # ScholarTrace
 
-A transparent, evidence-first research assistant for academic retrieval and grounded question answering.
+ScholarTrace is a local, evidence-first retrieval-augmented generation (RAG) application for research and document-grounded question answering. It is built to help a user ask questions against a corpus or against a file they upload, and then inspect the actual evidence used to answer the question.
 
-Live demo: https://scholartrace-x7xu.onrender.com
+This project is not just a chatbot demo. It is intended to show a real RAG workflow in a simple and transparent way:
 
-ScholarTrace is a full-stack Retrieval-Augmented Generation system designed to make the retrieval layer visible, auditable, and reproducible. The project does not hide evidence behind opaque model behavior. Instead, it retrieves source passages, scores them, ranks them, and grounds every answer in traceable citations from the indexed corpus.
+- the system finds relevant passages
+- ranks them using multiple signals
+- checks whether the evidence is strong enough
+- answers with citations
+- keeps the answer traceable and inspectable
 
-The application is built for research clarity as much as for user experience. It supports real academic corpora, user-uploaded documents, and systematic evaluation workflows for retrieval quality and citation coverage.
+This makes it useful for research workflows, document analysis, academic reading, and local knowledge extraction where source grounding matters.
 
-## Why this project matters
+## Why this project exists
 
-Most RAG demos stop at a single model invocation. ScholarTrace goes further:
+In many AI applications, the model can answer convincingly without actually showing where the answer came from. That creates trust problems. For research, academic work, documentation, and technical review, this is not enough.
 
-- it validates source documents before indexing,
-- it preserves passage metadata such as title, section, page, and source URL,
-- it exposes retrieval scores and evidence quality signals,
-- it reranks results to reduce duplicate evidence from the same source,
-- it grounds every answer in source passages that can be inspected,
-- and it measures retrieval quality with reproducible evaluation metrics.
+A strong RAG system should do the following:
 
-This makes the project useful both as a working application and as a research artifact for studying retrieval behavior and citation quality.
+- find the right evidence first
+- use only retrieved context to answer
+- show the evidence behind the answer
+- avoid answering when the corpus is weak or missing
+- allow users to inspect the source passages
 
-## Core capabilities
+ScholarTrace was designed around these principles. It gives you a local, understandable RAG system that can be used to explore documents, upload research files, and ask grounded questions without hiding the retrieval process.
 
-- Hybrid retrieval using TF-IDF, BM25, and overlap-based signals
-- Metadata-aware search across document titles and section names
-- Diversity-aware reranking across source documents
-- Configurable chunk size and overlap settings
-- Support for JSON, Markdown, TXT, and optional PDF ingestion
-- Extractive answer generation with citation-grounded evidence
-- Explicit abstention when the corpus does not contain enough evidence
-- Query latency and retrieval counts in every API response
-- Benchmarking with Recall@K, MRR, Precision@K, and citation coverage metrics
-- FastAPI backend with OpenAPI documentation
-- Responsive web interface for live use and demonstrations
+## Benefits of this project
 
-## System architecture
+- Transparent retrieval: you can see the exact passages used
+- Evidence-based answers: the model is grounded in retrieved content
+- Works with uploaded files: users can ask questions about their own document
+- Flexible background pipeline: supports local corpus data, uploaded documents, and research JSON
+- Good for learning RAG architecture: each step is cleanly separated
+- Good for demos and prototypes: easy to run locally in a browser
+- Good for technical evaluation: includes benchmark-style retrieval scoring
+
+## What the system does
+
+ScholarTrace lets a user do one of the following:
+
+1. Ask a question against the active research corpus
+2. Upload a document and ask questions about that file
+3. Search without typing a prompt if the uploaded file is the only evidence source
+4. Inspect supporting passages and citations returned by the system
+5. Review evaluation metrics such as recall and retrieval quality
+
+The app is built to behave like a research assistant that works with evidence, not guesswork.
+
+## High-level architecture
 
 ```mermaid
 flowchart LR
-    A[Research files] --> B[DocumentLoader]
-    B --> C[Chunker]
-    C --> D[HybridRetriever]
-    Q[User question] --> D
-    D --> E[CitationValidator]
-    E --> F[AnswerGenerator]
-    F --> G[FastAPI and UI]
-    D --> H[EvaluationRunner]
+    A[User input or uploaded file] --> B[FastAPI backend]
+    B --> C[Document ingestion]
+    C --> D[Chunking and metadata extraction]
+    D --> E[Hybrid retriever]
+    E --> F[Evidence reranking]
+    F --> G[Citation validation]
+    G --> H[Answer generation]
+    H --> I[Frontend UI]
+    I --> J[User sees answer + citations]
 ```
 
-### Runtime flow
+## End-to-end pipeline
 
-1. DocumentLoader reads structured records or converts user files into records.
-2. Chunker creates passage-level units while preserving document metadata.
-3. HybridRetriever builds a searchable index using multiple retrieval signals.
-4. A diversity reranker helps avoid concentration of evidence from a single document.
-5. CitationValidator filters unsupported or weakly matched passages.
-6. DemoAnswerGenerator selects the best supporting evidence for the final answer.
-7. ResearchPipeline measures latency and coordinates retrieval and answering.
-8. The FastAPI service exposes the result to the browser and API clients.
+```mermaid
+sequenceDiagram
+    participant User
+    participant Frontend
+    participant API
+    participant Pipeline
+    participant Retriever
+    participant Generator
 
-## Live demo
-
-- Web app: https://scholartrace-x7xu.onrender.com
-- API docs: http://127.0.0.1:8000/docs when running locally
-
-## Quick start
-
-### Local development
-
-```powershell
-.venv\Scripts\Activate.ps1
-uvicorn scholartrace.api:app --reload
+    User->>Frontend: Upload file or type a question
+    Frontend->>API: POST /api/documents or /api/query
+    API->>Pipeline: Load file, create chunks, index content
+    Pipeline->>Retriever: Search relevant passages
+    Retriever-->>Pipeline: Ranked evidence list
+    Pipeline->>Generator: Build answer with supporting citations
+    Generator-->>API: Answer, citations, confidence
+    API-->>Frontend: JSON response
+    Frontend-->>User: Answer and evidence panel
 ```
 
-Then open:
+## How the project works in simple language
+
+The system follows a standard and practical RAG pattern:
+
+1. A document is loaded
+2. It is split into smaller chunks
+3. Important metadata is preserved
+4. A search step reads the question and finds relevant chunks
+5. Those chunks are ranked by lexical and retrieval signals
+6. A generator chooses the most relevant evidence and forms the answer
+7. Citations are attached so the user can inspect the source text
+
+This clears the gap between model output and human verification. The answer is not just a generated sentence; it is a grounded answer grounded in actual text.
+
+## Main functionality
+
+### 1. Corpus ingestion
+
+The project can load documents from several sources:
+
+- local JSON research records
+- Markdown files
+- plain text files
+- PDF files when optional PDF support is installed
+- uploaded user documents in the local web app
+
+The ingestion layer reads the content and converts it into chunked text blocks for retrieval.
+
+### 2. Chunking and metadata preservation
+
+Each document is split into chunk units. Metadata such as:
+
+- document ID
+- title
+- section
+- page
+- source URL
+- authors
+- year
+- DOI
+
+is preserved alongside the chunk text. This is important because evidence needs to be traceable and explainable.
+
+### 3. Hybrid retrieval
+
+The retriever combines multiple signals:
+
+- lexical similarity
+- BM25 scoring
+- overlap scoring
+- semantic similarity fallback
+- diversity-aware reranking
+
+This makes retrieval stronger than a single scoring method. The system is designed to surface relevant evidence even when the question is imperfect or phrased in a different way.
+
+### 4. Answer generation with evidence
+
+The generator uses the top retrieved passages to produce an answer. It also checks whether the result is strongly supported. If support is weak, the system can abstain rather than hallucinate.
+
+This is a key ethical and technical feature in RAG: the model is encouraged to say when it does not have enough evidence.
+
+### 5. Uploaded-file search
+
+The project supports a very important workflow: a user can upload a file and ask questions about it without writing a long prompt first.
+
+The app can also behave in a file-first mode where the uploaded file acts as the active evidence source. This is useful when the user wants a local research summary based on a single document or a small corpus.
+
+### 6. Evaluation
+
+ScholarTrace includes a benchmark layer for retrieval quality. This lets you run queries against evaluation cases and inspect metrics such as:
+
+- Recall@5
+- Recall@10
+- reciprocal rank
+- precision
+- citation coverage
+
+This is useful for comparing retrieval quality and understanding whether the system is finding the right passages.
+
+## The need for this project
+
+The need for this project is straightforward:
+
+- generative AI often gives answers without evidence
+- users cannot easily trust or verify claims
+- research workflows need grounded reference passages
+- document analysis should be inspectable and explainable
+- local file-based knowledge workflows are often more practical than large cloud-only systems
+
+This project addresses those needs by pairing retrieval with verification and source traceability.
+
+## Architecture in modules
+
+The code is organized into clear components:
+
+- `api.py` — FastAPI app and endpoints
+- `pipeline.py` — orchestration of ingestion, retrieval, and generation
+- `retrieval.py` — hybrid retrieval logic
+- `generation.py` — answer generation and evidence validation
+- `ingestion.py` — document loading and chunk creation
+- `evaluation.py` — benchmark runner and evaluation cases
+- `models.py` — data structures for chunks, answers, and search results
+
+## Project layout
 
 ```text
-http://127.0.0.1:8000
-```
-
-### New environment setup
-
-```powershell
-py -m venv .venv
-.venv\Scripts\Activate.ps1
-pip install -e ".[dev]"
-```
-
-Optional PDF support:
-
-```powershell
-pip install -e ".[dev,pdf]"
-```
-
-## Example usage
-
-Try questions such as:
-
-```text
-How should a RAG system be evaluated?
-```
-
-```text
-Why do machine learning systems need observability?
-```
-
-```text
-What are data contracts?
-```
-
-The interface displays the grounded answer, confidence estimate, supporting evidence, source metadata, retrieval count, and measured latency.
-
-## Data strategy
-
-ScholarTrace supports several corpus modes, each intentionally designed for a different research or operational use case:
-
-- `data/arxiv_corpus.json`: the primary research corpus collected from arXiv and used by default in normal application mode.
-- `data/sample_corpus.json`: a smaller demo corpus retained for smoke tests and lightweight debugging.
-- `data/uploads/`: user-uploaded documents indexed at runtime.
-
-The app and evaluation scripts prefer real scholarly data. The demo dataset is not the default production path.
-
-## Data ingestion
-
-The loader supports:
-
-- JSON records with ScholarTrace metadata
-- Markdown notes
-- Plain text files
-- PDF files when optional dependencies are installed
-
-Each record can include the following fields:
-
-```json
-{
-  "id": "paper-001",
-  "title": "Example Research Paper",
-  "section": "Methods",
-  "page": 3,
-  "text": "The research passage goes here.",
-  "source_url": "https://example.org/paper"
-}
-```
-
-For PDFs, the loader creates one source record per page so citations retain page provenance. Local Markdown and TXT files receive a `file://` source reference.
-
-## API usage
-
-Health check:
-
-```http
-GET /api/health
-```
-
-Example PowerShell request:
-
-```powershell
-Invoke-RestMethod `
-  -Uri http://127.0.0.1:8000/api/query `
-  -Method Post `
-  -ContentType "application/json" `
-  -Body '{"question":"How should a RAG system be evaluated?","top_k":3}'
-```
-
-The response includes:
-
-- `answer`: the extractive answer text with citation numbers
-- `confidence`: a retrieval-based confidence estimate
-- `abstained`: whether the system declined to answer
-- `citations`: selected evidence for the answer
-- `retrieval`: all ranked results returned for the query
-- `latency_ms`: measured local pipeline latency
-- `retrieval_count`: number of retrieved passages
-
-Upload a document through the API:
-
-```powershell
-curl.exe -X POST http://127.0.0.1:8000/api/documents -F "file=@research-notes.md"
-```
-
-## Reproducible experiments
-
-The repository includes an arXiv abstract corpus in `data/arxiv_corpus.json` when generated locally. For a much larger corpus, run:
-
-```powershell
-python scripts\collect_arxiv.py --limit 1000
-python scripts\build_arxiv_cases.py
-python scripts\run_experiments.py
-```
-
-The experiment compares three configurations:
-
-1. TF-IDF cosine similarity only
-2. BM25 only
-3. The ScholarTrace hybrid configuration
-
-Results are written to `experiments/retrieval_ablation.json` and interpreted in `experiments/REPORT.md`.
-
-## Human-authored evaluation data
-
-ScholarTrace includes an importer for the HotpotQA distractor development set. HotpotQA contains human-written questions, answers, context paragraphs, and gold supporting facts, and it is distributed under the CC BY-SA 4.0 license.
-
-Run:
-
-```powershell
-python scripts\collect_hotpotqa.py --limit 100
-python scripts\run_experiments.py
-```
-
-The importer preserves the original question and answer fields and maps gold supporting-fact titles to ScholarTrace document IDs. Some environments block the official dataset host; in those cases the importer fails safely instead of creating misleading local data.
-
-## Evaluation methodology
-
-The retrieval benchmark uses a configurable value of K, defaulting to 3.
-
-- **Recall@K:** proportion of questions with at least one relevant result in the top K
-- **Mean Reciprocal Rank:** average reciprocal position of the first relevant result
-- **Precision@K:** proportion of returned results that are relevant
-- **Citation coverage:** proportion of returned results that correspond to labeled relevant evidence
-
-These metrics evaluate retrieval and evidence selection, not factual correctness by themselves. A stronger study should add human judgments for faithfulness, citation correctness, completeness, and unsupported claims.
-
-## Current results
-
-The checked-in arXiv experiment currently reports:
-
-| Retriever | Recall@3 | MRR | Precision@3 | Citation coverage |
-| --- | ---: | ---: | ---: | ---: |
-| TF-IDF | 1.000 | 1.000 | 0.800 | 0.800 |
-| BM25 | 1.000 | 1.000 | 0.333 | 0.333 |
-| Hybrid | 1.000 | 1.000 | 0.800 | 0.800 |
-
-These results are useful as a baseline, but they should not be overstated. The arXiv cases are silver labels derived from paper metadata, and perfect recall on this benchmark does not mean the system solves general academic question answering.
-
-## Repository structure
-
-```text
-scholartrace/
-├── .github/workflows/ci.yml
+rag_project/
 ├── data/
 │   ├── arxiv_corpus.json
 │   ├── arxiv_evaluation_cases.json
@@ -246,6 +199,236 @@ scholartrace/
 │   ├── sample_corpus.json
 │   └── uploads/
 ├── experiments/
+│   ├── README.md
+│   ├── REPORT.md
+│   └── retrieval_ablation.json
+├── frontend/
+│   ├── app.js
+│   ├── index.html
+│   └── styles.css
+├── scripts/
+│   ├── build_arxiv_cases.py
+│   ├── collect_arxiv.py
+│   ├── collect_hotpotqa.py
+│   ├── evaluate.py
+│   ├── ingest_arxiv_pdfs.py
+│   └── run_experiments.py
+├── src/
+│   └── scholartrace/
+│       ├── __init__.py
+│       ├── api.py
+│       ├── evaluation.py
+│       ├── generation.py
+│       ├── ingestion.py
+│       ├── models.py
+│       ├── pipeline.py
+│       └── retrieval.py
+├── tests/
+│   ├── test_api.py
+│   └── test_pipeline.py
+├── Dockerfile
+├── README.md
+├── pyproject.toml
+├── render.yaml
+└── .venv/
+```
+
+## Local setup
+
+### 1. Create the environment
+
+```powershell
+cd c:\Users\HP\Desktop\rag_project
+py -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install -e ".[dev]"
+```
+
+### 2. Optional PDF support
+
+If you want PDF ingestion, install the extra dependency:
+
+```powershell
+pip install -e ".[dev,pdf]"
+```
+
+### 3. Start the app
+
+```powershell
+uvicorn scholartrace.api:app --reload
+```
+
+Then open the app in the browser:
+
+```text
+http://127.0.0.1:8000
+```
+
+## Usage examples
+
+### Ask a question against the corpus
+
+Type a question like:
+
+```text
+How should a RAG system be evaluated?
+```
+
+The app will:
+
+- retrieve relevant chunks
+- rank them using the hybrid retriever
+- generate an answer from the evidence
+- show citations and confidence
+
+### Upload a file and ask about it
+
+1. Click Upload file
+2. Choose a local `.md`, `.txt`, `.json`, or `.pdf` document
+3. Ask a question or leave it blank to search based on the uploaded file itself
+4. Review the answer and citations produced from that document
+
+This is useful for personal notes, research drafts, technical documents, and local project notes.
+
+## API reference
+
+### Health endpoint
+
+```http
+GET /api/health
+```
+
+Returns metadata about the active index, number of chunks, source type, and retrieval configuration.
+
+### Query endpoint
+
+```http
+POST /api/query
+```
+
+Example request:
+
+```json
+{
+  "question": "How should a RAG system be evaluated?",
+  "top_k": 4
+}
+```
+
+Example response:
+
+```json
+{
+  "question": "How should a RAG system be evaluated?",
+  "answer": "A RAG system should be evaluated on retrieval quality, answer grounding, and evidence coverage.",
+  "confidence": 0.81,
+  "abstained": false,
+  "citations": [
+    {
+      "title": "Evidence retrieval",
+      "section": "Document",
+      "text": "Retrieval quality matters because it determines what evidence is available to the model.",
+      "score": 0.42
+    }
+  ],
+  "retrieval_count": 4,
+  "latency_ms": 12.5
+}
+```
+
+### Document upload endpoint
+
+```http
+POST /api/documents
+```
+
+Upload one supported file and index it into the local evidence set.
+
+Supported formats:
+
+- `.md`
+- `.txt`
+- `.json`
+- `.pdf`
+
+## Why this is a strong project for demonstration
+
+This project is strong because it demonstrates the real core of RAG:
+
+- retrieval is visible
+- evidence is inspected
+- answer quality depends on source quality
+- not every response is accepted if the evidence is weak
+- the system is built to be understandable by humans
+
+It is a better teaching and prototype project than a black-box chatbot because it makes each part of the pipeline legible.
+
+## Deployment options
+
+The project includes deployment support for simple hosting and container deployment.
+
+- `Dockerfile` for container-based deployment
+- `render.yaml` for Render deployment
+- Python packaging metadata in `pyproject.toml`
+
+This makes it usable both locally and in a lightweight deployment environment.
+
+## Evaluation and benchmarking
+
+The project includes retrieval evaluation helpers and benchmark-style cases. It can measure:
+
+- whether relevant documents appear in the top results
+- how many relevant results appear within the top K
+- the quality of ranking
+- how much of the answer is covered by retrieved evidence
+
+Evaluation is important because a model may sound confident even when its evidence is weak. This project exposes the retrieval quality instead of hiding it.
+
+## Current status and caveats
+
+This project is a working local RAG application rather than a research-paper-only prototype. It is designed to be useful in practice and to demonstrate how a document-grounded assistant can work in a real environment.
+
+Important caveats:
+
+- it is local-first and not designed for very large-scale enterprise indexing by default
+- retrieval is optimized for a clean, explainable local setup rather than a massive distributed production platform
+- for large corpora, the next step is moving from in-memory indexing to a persistent vector or hybrid search backend
+
+## Future improvements
+
+Possible next steps for this project include:
+
+- persistent vector indexing for large corpora
+- database-backed document storage
+- multi-document collection management
+- user session history
+- stronger answer summarization and citations formatting
+- better UI for file selection, corpus management, and search history
+- stronger integration with research-paper datasets and benchmarks
+
+## Verification
+
+This project has automated tests for the API and retrieval pipeline. You can run the suite with:
+
+```powershell
+.venv\Scripts\python.exe -m pytest -q
+```
+
+The project is currently in a passing state in this environment.
+
+## Summary
+
+ScholarTrace is a practical, transparent, and academically grounded RAG project. It helps users understand what retrieval-augmented generation really does, how evidence is used, and why source grounding matters.
+
+It is useful for:
+
+- document analysis
+- research workflows
+- local knowledge retrieval
+- educational RAG demonstrations
+- technical prototyping
+
+If you want to understand the mechanics of RAG in a simple and inspectable way, this project is a good example.
 │   ├── README.md
 │   ├── REPORT.md
 │   └── retrieval_ablation.json
