@@ -1,5 +1,7 @@
 # ScholarTrace
 
+Live app: [ScholarTrace](https://scholartrace-x7xu.onrender.com/)
+
 ScholarTrace is a local, evidence-first retrieval-augmented generation (RAG) application for research and document-grounded question answering. It is built to help a user ask questions against a corpus or against a file they upload, and then inspect the actual evidence used to answer the question.
 
 This project is not just a chatbot demo. It is intended to show a real RAG workflow in a simple and transparent way:
@@ -363,16 +365,6 @@ This project is strong because it demonstrates the real core of RAG:
 
 It is a better teaching and prototype project than a black-box chatbot because it makes each part of the pipeline legible.
 
-## Deployment options
-
-The project includes deployment support for simple hosting and container deployment.
-
-- `Dockerfile` for container-based deployment
-- `render.yaml` for Render deployment
-- Python packaging metadata in `pyproject.toml`
-
-This makes it usable both locally and in a lightweight deployment environment.
-
 ## Evaluation and benchmarking
 
 The project includes retrieval evaluation helpers and benchmark-style cases. It can measure:
@@ -454,23 +446,6 @@ If you want to understand the mechanics of RAG in a simple and inspectable way, 
 └── .gitignore
 ```
 
-## Deployment
-
-The repository includes a Render configuration in `render.yaml` for a free deployment target.
-
-```yaml
-services:
-  - type: web
-    name: scholartrace
-    runtime: python
-    plan: free
-    buildCommand: pip install .
-    startCommand: uvicorn scholartrace.api:app --host 0.0.0.0 --port $PORT
-    healthCheckPath: /api/health
-```
-
-Render uses the health check at `/api/health`. The app starts with `uvicorn` on Render’s `$PORT` value. This is suitable for a public demonstration, but free instances may sleep when inactive, and uploads are not durable on ephemeral storage.
-
 ## License and research use
 
 This project is designed for transparent research use and reproducible evaluation. If you publish results derived from the included datasets or experimental workflows, retain attribution to the source data and document corpus version, collection date, query parameters, and evaluation configuration.
@@ -531,18 +506,6 @@ The project includes regression tests for:
 - API citations and telemetry.
 
 GitHub Actions runs the test suite on pushes and pull requests.
-
-## Free Deployment with Render
-
-The repository includes `render.yaml` for a free Render web service. To deploy it:
-
-1. Sign in at [render.com](https://render.com) with GitHub.
-2. Choose **New**, then **Blueprint**.
-3. Select `TejvirG/ScholarTrace`.
-4. Confirm the service from `render.yaml` and choose the free plan.
-5. Wait for the build to finish, then open the generated `.onrender.com` URL.
-
-Render uses the health check at `/api/health`. The service starts with `uvicorn` on Render's `$PORT` value. This is suitable for a public demonstration, but free instances can sleep when inactive and local uploads are not durable. Do not upload private or sensitive documents to a public demo.
 
 ## Engineering Decisions
 
